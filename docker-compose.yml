@@ -1,45 +1,89 @@
 version: '3.8'
 
 services:
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: budgetnest-db
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: budgetnest
+      MYSQL_USER: budgetnest_user
+      MYSQL_PASSWORD: budgetnest_password
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - budgetnest-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Laravel Backend API
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    container_name: budgetnest-backend
+    restart: unless-stopped
     ports:
       - "8000:8000"
+    environment:
+      APP_NAME: BudgetNest
+      APP_ENV: production
+      APP_DEBUG: false
+      APP_URL: http://localhost:8000
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: budgetnest
+      DB_USERNAME: budgetnest_user
+      DB_PASSWORD: budgetnest_password
+      FRONTEND_URL: http://localhost:5173
     volumes:
       - ./backend:/var/www/html
-    environment:
-      - DB_CONNECTION=mysql
-      - DB_HOST=db
-      - DB_PORT=3306
-      - DB_DATABASE=budgetnest
-      - DB_USERNAME=root
-      - DB_PASSWORD=secret
+      - backend_storage:/var/www/html/storage
+      - backend_cache:/var/www/html/bootstrap/cache
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    networks:
+      - budgetnest-network
+    command: >
+      sh -c "php artisan key:generate --force &&
+             php artisan config:cache &&
+             php artisan migrate --force &&
+             php artisan db:seed --force &&
+             php artisan serve --host=0.0.0.0 --port=8000"
 
+  # React Frontend
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    container_name: budgetnest-frontend
+    restart: unless-stopped
     ports:
       - "5173:5173"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
     environment:
-      - VITE_API_URL=http://localhost:8000/api
-
-  db:
-    image: mysql:8.0
-    ports:
-      - "3306:3306"
-    environment:
-      - MYSQL_ROOT_PASSWORD=secret
-      - MYSQL_DATABASE=budgetnest
-    volumes:
-      - db_data:/var/lib/mysql
+      VITE_API_URL: http://localhost:8000/api
+    depends_on:
+      - backend
+    networks:
+      - budgetnest-network
 
 volumes:
   db_data:
+    driver: local
+  backend_storage:
+    driver: local
+  backend_cache:
+    driver: local
+
+networks:
+  budgetnest-network:
+    driver: bridge
+
