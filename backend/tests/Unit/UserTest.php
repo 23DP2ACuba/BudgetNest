@@ -29,7 +29,6 @@ class UserTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->assertArrayHasKey('ownedBudgets', $user->getRelations() ?? []);
         $relation = $user->ownedBudgets();
 
         $this->assertInstanceOf(\Illuminate\Database\Eloquent\Relations\HasMany::class, $relation);

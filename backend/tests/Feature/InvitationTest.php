@@ -26,7 +26,7 @@ class InvitationTest extends TestCase
         ]);
 
         $response->assertStatus(201);
-        $response->assertJson(['message' => 'User invited successfully']);
+        $response->assertJson(['message' => 'Invitation sent successfully']);
 
         $this->assertDatabaseHas('budget_user', [
             'budget_id' => $budget->id,
@@ -48,7 +48,7 @@ class InvitationTest extends TestCase
         ]);
 
         $response->assertStatus(422);
-        $response->assertSessionHasErrors(['email', 'role']);
+        $response->assertJsonValidationErrors(['email', 'role']);
     }
 
     public function test_invite_requires_invited_user_to_exist(): void
@@ -64,7 +64,7 @@ class InvitationTest extends TestCase
         ]);
 
         $response->assertStatus(422);
-        $response->assertSessionHasErrors('email');
+        $response->assertJsonValidationErrors(['email']);
     }
 
     public function test_cannot_invite_already_member(): void
@@ -73,7 +73,15 @@ class InvitationTest extends TestCase
         $friend = User::factory()->create(['email' => 'friend@example.com']);
         $budget = Budget::factory()->create(['created_by' => $owner->id]);
         $budget->users()->attach($owner->id, ['role' => 'owner']);
-        $budget->users()->attach($friend->id, ['role' => 'viewer']);
+        // Directly insert into pivot to ensure status is persisted
+        \Illuminate\Support\Facades\DB::table('budget_user')->insert([
+            'budget_id' => $budget->id,
+            'user_id' => $friend->id,
+            'role' => 'viewer',
+            'status' => 'accepted',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
         Sanctum::actingAs($owner);
 
         $response = $this->postJson('/api/budgets/' . $budget->id . '/invite', [

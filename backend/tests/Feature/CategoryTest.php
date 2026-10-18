@@ -22,7 +22,7 @@ class CategoryTest extends TestCase
         $response = $this->getJson('/api/categories');
 
         $response->assertStatus(200);
-        $response->assertJsonCount(3);
+        $response->assertJsonCount(26); // 3 created + 23 seeded
     }
 
     public function test_user_can_create_category(): void
@@ -60,7 +60,7 @@ class CategoryTest extends TestCase
         ]);
 
         $response->assertStatus(422);
-        $response->assertSessionHasErrors('type');
+        $response->assertJsonValidationErrors(['type']);
     }
 
     public function test_user_can_view_category(): void

@@ -19,7 +19,13 @@ class TransactionTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user);
 
-        Transaction::factory()->count(3)->create(['user_id' => $user->id]);
+        $budget = Budget::factory()->create(['created_by' => $user->id]);
+        $category = Category::factory()->create();
+        Transaction::factory()->count(3)->create([
+            'user_id' => $user->id,
+            'budget_id' => $budget->id,
+            'category_id' => $category->id,
+        ]);
 
         $response = $this->getJson('/api/transactions');
 
@@ -74,7 +80,7 @@ class TransactionTest extends TestCase
         ]);
 
         $response->assertStatus(422);
-        $response->assertSessionHasErrors('amount');
+        $response->assertJsonValidationErrors(['amount']);
     }
 
     public function test_user_can_view_transaction(): void
@@ -186,6 +192,7 @@ class TransactionTest extends TestCase
     {
         $user = User::factory()->create();
         $budget = Budget::factory()->create(['created_by' => $user->id]);
+        $budget->users()->attach($user->id, ['role' => 'owner']);
         $category = Category::factory()->create();
         Sanctum::actingAs($user);
 
