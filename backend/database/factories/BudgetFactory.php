@@ -16,8 +16,8 @@ class BudgetFactory extends Factory
             'name' => fake()->word() . ' Budget',
             'description' => fake()->sentence(),
             'total_amount' => fake()->randomFloat(2, 100, 10000),
-            'start_date' => fake()->dateBetween('-1 month', 'today'),
-            'end_date' => fake()->dateBetween('today', '+1 month'),
+            'start_date' => now()->subMonth()->format('Y-m-d'),
+            'end_date' => now()->addMonth()->format('Y-m-d'),
             'created_by' => 1,
         ];
     }
