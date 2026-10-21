@@ -6,12 +6,18 @@ import { getAllTransactions } from '../api/transactions';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import Navbar from '../components/layout/Navbar';
 import { formatCurrency, formatDate } from '../utils/formatters';
+import PendingInvitations from '../components/budgets/PendingInvitations';
+import MonthlyTrend from '../components/charts/MonthlyTrend';
+import ExpenseByCategory from '../components/charts/ExpenseByCategory';
 
 const Dashboard = () => {
     const { user } = useAuth();
     const [budgets, setBudgets] = useState([]);
     const [recentTransactions, setRecentTransactions] = useState([]);
+    const [monthlyTrend, setMonthlyTrend] = useState([]);
+    const [expenseCategories, setExpenseCategories] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedBudgetId, setSelectedBudgetId] = useState(null);
     const [stats, setStats] = useState({
         totalBudgets: 0,
         totalIncome: 0,
@@ -20,7 +26,7 @@ const Dashboard = () => {
 
     useEffect(() => {
         fetchDashboardData();
-    }, []);
+    }, [selectedBudgetId]);
 
     const fetchDashboardData = async () => {
         try {
@@ -32,20 +38,62 @@ const Dashboard = () => {
 
             const allTransactions = transactionsData.data || transactionsData;
             setBudgets(budgetsData);
-            setRecentTransactions(allTransactions.slice(0, 5));
 
-            const income = allTransactions
+            // Filter transactions by selected budget (if any)
+            const budgetTransactions = selectedBudgetId
+                ? allTransactions.filter(t => t.budget_id === selectedBudgetId)
+                : allTransactions;
+
+            setRecentTransactions(budgetTransactions.slice(0, 5));
+
+            const income = budgetTransactions
                 .filter(t => t.type === 'income')
                 .reduce((sum, t) => sum + parseFloat(t.amount), 0);
-            const expenses = allTransactions
+            const expenses = budgetTransactions
                 .filter(t => t.type === 'expense')
                 .reduce((sum, t) => sum + parseFloat(t.amount), 0);
 
+            // Monthly trend data (last 6 months)
+            const monthlyData = {};
+            const expenseByCategory = {};
+
+            budgetTransactions.forEach((t) => {
+                const month = t.transaction_date?.slice(0, 7) || 'Unknown';
+                if (!monthlyData[month]) {
+                    monthlyData[month] = { income: 0, expense: 0 };
+                }
+                if (t.type === 'income') {
+                    monthlyData[month].income += parseFloat(t.amount);
+                } else {
+                    monthlyData[month].expense += parseFloat(t.amount);
+                }
+
+                if (t.type === 'expense' && t.category) {
+                    const catName = t.category.name;
+                    if (!expenseByCategory[catName]) {
+                        expenseByCategory[catName] = 0;
+                    }
+                    expenseByCategory[catName] += parseFloat(t.amount);
+                }
+            });
+
+            const monthlyTrend = Object.entries(monthlyData).map(([month, data]) => ({
+                month,
+                ...data,
+            }));
+
+            const expenseCategories = Object.entries(expenseByCategory).map(([name, amount]) => ({
+                name,
+                amount,
+            }));
+
             setStats({
-                totalBudgets: budgetsData.length,
+                totalBudgets: selectedBudgetId ? 1 : budgetsData.length,
                 totalIncome: income,
                 totalExpenses: expenses,
             });
+            setMonthlyTrend(monthlyTrend);
+            setExpenseCategories(expenseCategories);
         } catch (error) {
             console.error('Failed to fetch dashboard data:', error);
         } finally {
@@ -169,6 +217,39 @@ const Dashboard = () => {
                             </div>
                         )}
                     </div>
+                </div>
+                <PendingInvitations />
+                {/* Budget Selector */}
+                <div className="bg-white rounded-lg shadow border border-gray-200 p-6 mb-8">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <h2 className="text-xl font-semibold text-gray-900">
+                            Budget Statistics
+                        </h2>
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600">View by budget:</span>
+                            <select
+                                value={selectedBudgetId || ''}
+                                onChange={(e) =>
+                                    setSelectedBudgetId(
+                                        e.target.value === '' ? null : parseInt(e.target.value)
+                                    )
+                                }
+                                className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white"
+                            >
+                                <option value="">All Budgets</option>
+                                {budgets.map((budget) => (
+                                    <option key={budget.id} value={budget.id}>
+                                        {budget.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                {/* Charts */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <MonthlyTrend data={monthlyTrend} />
+                    <ExpenseByCategory data={expenseCategories} />
                 </div>
                 {/* Recent Transactions */}
                 <div className="bg-white rounded-lg shadow p-6">

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
+import { updateProfile, updatePassword } from '../api/auth';
 import Navbar from '../components/layout/Navbar';
 import Alert from '../components/ui/Alert';
 
@@ -37,14 +38,13 @@ const Profile = () => {
         setError('');
         setSuccess('');
 
-        // TODO: Implement profile update API call
         try {
-            // await updateProfile(formData);
-            setSuccess('Profile updated successfully');
+            const data = await updateProfile(formData);
+            setSuccess(data.message || 'Profile updated successfully');
             setIsEditing(false);
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            setError('Failed to update profile');
+            setError(err.response?.data?.message || 'Failed to update profile');
         }
     };
 
@@ -58,9 +58,12 @@ const Profile = () => {
             return;
         }
 
-        // TODO: Implement password update API call
         try {
-            // await updatePassword(passwordData);
+            await updatePassword({
+                current_password: passwordData.current_password,
+                new_password: passwordData.new_password,
+                new_password_confirmation: passwordData.new_password_confirmation,
+            });
             setSuccess('Password updated successfully');
             setPasswordData({
                 current_password: '',
@@ -69,7 +72,7 @@ const Profile = () => {
             });
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            setError('Failed to update password');
+            setError(err.response?.data?.message || 'Failed to update password');
         }
     };
 
