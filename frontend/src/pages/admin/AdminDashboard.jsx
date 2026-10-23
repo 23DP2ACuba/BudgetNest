@@ -5,10 +5,12 @@ import axiosInstance from '../../api/axios';
 import Navbar from '../../components/layout/Navbar';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import Alert from '../../components/ui/Alert';
+import { useTranslation } from 'react-i18next';
 
 const AdminDashboard = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [stats, setStats] = useState(null);
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -33,7 +35,7 @@ const AdminDashboard = () => {
             setStats(dashboardResponse.data);
             setUsers(usersResponse.data.data || usersResponse.data);
         } catch (err) {
-            setError('Failed to load admin data');
+            setError(t('common.failedToLoadAdminData'));
             console.error(err);
         } finally {
             setLoading(false);
@@ -47,7 +49,7 @@ const AdminDashboard = () => {
             });
             setUsers(response.data.data || response.data);
         } catch (err) {
-            setError('Search failed');
+            setError(t('common.searchFailed'));
         }
     };
 
@@ -64,7 +66,7 @@ const AdminDashboard = () => {
             <Navbar />
             
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-8">Admin Dashboard</h1>
+                <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('common.adminDashboard')}</h1>
 
                 {error && <Alert type="error" message={error} />}
 
@@ -73,7 +75,7 @@ const AdminDashboard = () => {
                     <div className="bg-white rounded-lg shadow p-6">
                         <div className="flex items-center">
                             <div className="flex-1">
-                                <p className="text-sm font-medium text-gray-600">Total Users</p>
+                                <p className="text-sm font-medium text-gray-600">{t('common.totalUsers')}</p>
                                 <p className="text-3xl font-bold text-gray-900">{stats?.total_users || 0}</p>
                             </div>
                             <div className="bg-indigo-100 rounded-full p-3">
@@ -87,7 +89,7 @@ const AdminDashboard = () => {
                     <div className="bg-white rounded-lg shadow p-6">
                         <div className="flex items-center">
                             <div className="flex-1">
-                                <p className="text-sm font-medium text-gray-600">Total Budgets</p>
+                                <p className="text-sm font-medium text-gray-600">{t('common.totalBudgets')}</p>
                                 <p className="text-3xl font-bold text-gray-900">{stats?.total_budgets || 0}</p>
                             </div>
                             <div className="bg-green-100 rounded-full p-3">
@@ -101,7 +103,7 @@ const AdminDashboard = () => {
                     <div className="bg-white rounded-lg shadow p-6">
                         <div className="flex items-center">
                             <div className="flex-1">
-                                <p className="text-sm font-medium text-gray-600">Total Transactions</p>
+                                <p className="text-sm font-medium text-gray-600">{t('common.totalTransactions')}</p>
                                 <p className="text-3xl font-bold text-gray-900">{stats?.total_transactions || 0}</p>
                             </div>
                             <div className="bg-purple-100 rounded-full p-3">
@@ -116,7 +118,7 @@ const AdminDashboard = () => {
                 {/* Recent Users */}
                 <div className="bg-white rounded-lg shadow mb-8">
                     <div className="px-6 py-4 border-b border-gray-200">
-                        <h2 className="text-xl font-semibold text-gray-900">Recent Users</h2>
+                        <h2 className="text-xl font-semibold text-gray-900">{t('common.recentUsers')}</h2>
                     </div>
                     <div className="p-6">
                         {stats?.recent_users && stats.recent_users.length > 0 ? (
@@ -134,7 +136,7 @@ const AdminDashboard = () => {
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-gray-500 text-center py-4">No users found</p>
+                            <p className="text-gray-500 text-center py-4">{t('common.noUsersFound')}</p>
                         )}
                     </div>
                 </div>
@@ -143,11 +145,11 @@ const AdminDashboard = () => {
                 <div className="bg-white rounded-lg shadow">
                     <div className="px-6 py-4 border-b border-gray-200">
                         <div className="flex justify-between items-center">
-                            <h2 className="text-xl font-semibold text-gray-900">All Users</h2>
+                            <h2 className="text-xl font-semibold text-gray-900">{t('common.allUsers')}</h2>
                             <div className="flex space-x-2">
                                 <input
                                     type="text"
-                                    placeholder="Search users..."
+                                    placeholder={t('common.searchUsers')}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     className="px-3 py-2 border border-gray-300 rounded-md text-sm"
@@ -156,7 +158,7 @@ const AdminDashboard = () => {
                                     onClick={handleSearch}
                                     className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm"
                                 >
-                                    Search
+                                    {t('common.search')}
                                 </button>
                             </div>
                         </div>
@@ -166,16 +168,16 @@ const AdminDashboard = () => {
                             <thead className="bg-gray-50">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        User
+                                        {t('common.user')}
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Email
+                                        {t('common.email')}
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Role
+                                        {t('common.role')}
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Joined
+                                        {t('common.joined')}
                                     </th>
                                 </tr>
                             </thead>
@@ -183,7 +185,7 @@ const AdminDashboard = () => {
                                 {users.length === 0 ? (
                                     <tr>
                                         <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
-                                            No users found
+                                            {t('common.noUsersFound')}
                                         </td>
                                     </tr>
                                 ) : (

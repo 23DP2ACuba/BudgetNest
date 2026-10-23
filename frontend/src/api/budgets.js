@@ -34,3 +34,23 @@ export const removeMember = async (budgetId, userId) => {
     const response = await axiosInstance.delete(`/budgets/${budgetId}/members/${userId}`);
     return response.data;
 };
+
+export const leaveBudget = async (budgetId) => {
+    const response = await axiosInstance.delete(`/budgets/${budgetId}/leave`);
+    return response.data;
+};
+
+export const getMyInvitations = async () => {
+    const response = await axiosInstance.get('/invitations');
+    return response.data;
+};
+
+export const acceptInvitation = async (budgetId) => {
+    const response = await axiosInstance.post(`/invitations/${budgetId}/accept`);
+    return response.data;
+};
+
+export const declineInvitation = async (budgetId) => {
+    const response = await axiosInstance.post(`/invitations/${budgetId}/decline`);
+    return response.data;
+};

@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
+import { updateProfile, updatePassword } from '../api/auth';
 import Navbar from '../components/layout/Navbar';
 import Alert from '../components/ui/Alert';
+import { useTranslation } from 'react-i18next';
 
 const Profile = () => {
     const { user } = useAuth();
+    const { t } = useTranslation();
     const [success, setSuccess] = useState('');
     const [error, setError] = useState('');
     const [isEditing, setIsEditing] = useState(false);
@@ -37,14 +40,13 @@ const Profile = () => {
         setError('');
         setSuccess('');
 
-        // TODO: Implement profile update API call
         try {
-            // await updateProfile(formData);
-            setSuccess('Profile updated successfully');
+            const data = await updateProfile(formData);
+            setSuccess(data.message || t('common.profileUpdated'));
             setIsEditing(false);
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            setError('Failed to update profile');
+            setError(err.response?.data?.message || t('common.failedToUpdateProfile'));
         }
     };
 
@@ -54,14 +56,17 @@ const Profile = () => {
         setSuccess('');
 
         if (passwordData.new_password !== passwordData.new_password_confirmation) {
-            setError('Passwords do not match');
+            setError(t('common.passwordsDoNotMatch'));
             return;
         }
 
-        // TODO: Implement password update API call
         try {
-            // await updatePassword(passwordData);
-            setSuccess('Password updated successfully');
+            await updatePassword({
+                current_password: passwordData.current_password,
+                new_password: passwordData.new_password,
+                new_password_confirmation: passwordData.new_password_confirmation,
+            });
+            setSuccess(t('common.passwordUpdated'));
             setPasswordData({
                 current_password: '',
                 new_password: '',
@@ -69,7 +74,7 @@ const Profile = () => {
             });
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            setError('Failed to update password');
+            setError(err.response?.data?.message || t('common.failedToUpdatePassword'));
         }
     };
 
@@ -78,7 +83,7 @@ const Profile = () => {
             <Navbar />
             
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-8">Profile Settings</h1>
+                <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('common.profileSettings')}</h1>
 
                 {success && <Alert type="success" message={success} />}
                 {error && <Alert type="error" message={error} />}
@@ -86,13 +91,13 @@ const Profile = () => {
                 {/* Profile Information */}
                 <div className="bg-white rounded-lg shadow mb-6">
                     <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                        <h2 className="text-xl font-semibold text-gray-900">Profile Information</h2>
+                        <h2 className="text-xl font-semibold text-gray-900">{t('common.profileInformation')}</h2>
                         {!isEditing && (
                             <button
                                 onClick={() => setIsEditing(true)}
                                 className="text-sm text-indigo-600 hover:text-indigo-700"
                             >
-                                Edit
+                                {t('common.edit')}
                             </button>
                         )}
                     </div>
@@ -101,7 +106,7 @@ const Profile = () => {
                             <form onSubmit={handleUpdateProfile} className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Full Name
+                                        {t('common.fullName')}
                                     </label>
                                     <input
                                         type="text"
@@ -115,7 +120,7 @@ const Profile = () => {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Email Address
+                                        {t('common.emailAddress')}
                                     </label>
                                     <input
                                         type="email"
@@ -139,13 +144,13 @@ const Profile = () => {
                                         }}
                                         className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                                     >
-                                        Cancel
+                                        {t('common.cancel')}
                                     </button>
                                     <button
                                         type="submit"
                                         className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                                     >
-                                        Save Changes
+                                        {t('common.saveChanges')}
                                     </button>
                                 </div>
                             </form>
@@ -153,25 +158,25 @@ const Profile = () => {
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">
-                                        Full Name
+                                        {t('common.fullName')}
                                     </label>
                                     <p className="mt-1 text-gray-900">{user?.name}</p>
                                 </div>
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">
-                                        Email Address
+                                        {t('common.emailAddress')}
                                     </label>
                                     <p className="mt-1 text-gray-900">{user?.email}</p>
                                 </div>
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">
-                                        Account Role
+                                        {t('common.accountRole')}
                                     </label>
                                     <p className="mt-1">
                                         <span className="inline-block px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800">
-                                            {user?.role || 'user'}
+                                            {user?.role || t('common.member')}
                                         </span>
                                     </p>
                                 </div>
@@ -183,13 +188,13 @@ const Profile = () => {
                 {/* Change Password */}
                 <div className="bg-white rounded-lg shadow">
                     <div className="px-6 py-4 border-b border-gray-200">
-                        <h2 className="text-xl font-semibold text-gray-900">Change Password</h2>
+                        <h2 className="text-xl font-semibold text-gray-900">{t('common.changePassword')}</h2>
                     </div>
                     <div className="p-6">
                         <form onSubmit={handleUpdatePassword} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Current Password
+                                    {t('common.currentPassword')}
                                 </label>
                                 <input
                                     type="password"
@@ -203,7 +208,7 @@ const Profile = () => {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    New Password
+                                    {t('common.newPassword')}
                                 </label>
                                 <input
                                     type="password"
@@ -218,7 +223,7 @@ const Profile = () => {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Confirm New Password
+                                    {t('common.confirmPassword')}
                                 </label>
                                 <input
                                     type="password"
@@ -235,7 +240,7 @@ const Profile = () => {
                                     type="submit"
                                     className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                                 >
-                                    Update Password
+                                    {t('common.updatePassword')}
                                 </button>
                             </div>
                         </form>
