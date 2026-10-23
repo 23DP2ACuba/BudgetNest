@@ -137,4 +137,32 @@ class BudgetController extends Controller
             'message' => 'Member removed successfully',
         ]);
     }
+
+    /**
+     * Leave the budget (current user detaches themselves)
+     */
+    public function leave(Request $request, Budget $budget)
+    {
+        $user = $request->user();
+
+        // Cannot leave if you are the creator
+        if ($budget->created_by === $user->id) {
+            return response()->json([
+                'message' => 'Budget creator cannot leave. Transfer ownership or delete the budget instead.',
+            ], 400);
+        }
+
+        // Check if user is a member
+        if (!$budget->users->contains($user)) {
+            return response()->json([
+                'message' => 'You are not a member of this budget.',
+            ], 403);
+        }
+
+        $budget->users()->detach($user->id);
+
+        return response()->json([
+            'message' => 'You have left the budget successfully.',
+        ]);
+    }
 }

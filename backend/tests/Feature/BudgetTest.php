@@ -63,7 +63,7 @@ class BudgetTest extends TestCase
         ]);
 
         $response->assertStatus(422);
-        $response->assertSessionHasErrors('end_date');
+        $response->assertJsonValidationErrors(['end_date']);
     }
 
     public function test_user_can_view_own_budget(): void

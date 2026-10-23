@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
+    libsqlite3-dev \
     zip \
     unzip \
     default-mysql-client
@@ -18,7 +19,7 @@ RUN apt-get update && apt-get install -y \
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+RUN docker-php-ext-install pdo_mysql pdo_sqlite mbstring exif pcntl bcmath gd
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -27,7 +28,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 COPY . /var/www/html
 
 # Install dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+RUN composer install --optimize-autoloader --no-interaction
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \

@@ -41,7 +41,7 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertStatus(422);
-        $response->assertSessionHasErrors('password_confirmation');
+        $response->assertJsonValidationErrors(['password']);
     }
 
     public function test_registration_rejects_duplicate_email(): void
@@ -56,7 +56,7 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertStatus(422);
-        $response->assertSessionHasErrors('email');
+        $response->assertJsonValidationErrors(['email']);
     }
 
     public function test_user_can_login(): void
@@ -85,7 +85,7 @@ class AuthTest extends TestCase
         ]);
 
         $response->assertStatus(422);
-        $response->assertSessionHasErrors('email');
+        $response->assertJsonValidationErrors(['email']);
     }
 
     public function test_authenticated_user_can_logout(): void
