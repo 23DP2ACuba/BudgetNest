@@ -1,20 +1,22 @@
 import axiosInstance from '../../api/axios';
+import { useTranslation } from 'react-i18next';
 
 const BudgetMembers = ({ members = [], budgetId, onRemove, onRoleChange }) => {
+    const { t } = useTranslation();
     const handleRemove = async (userId) => {
-        if (!confirm('Are you sure you want to remove this member?')) return;
+        if (!confirm(t('common.areYouSureRemoveMember'))) return;
         try {
             await axiosInstance.delete(
                 `/budgets/${budgetId}/members/${userId}`
             );
             onRemove?.(userId);
         } catch (err) {
-            alert('Failed to remove member');
+            alert(t('common.failedToRemoveMember'));
         }
     };
 
     if (members.length === 0) {
-        return <p className="text-gray-500 text-sm">No members</p>;
+        return <p className="text-gray-500 text-sm">{t('common.noData')}</p>;
     }
 
     return (
@@ -40,14 +42,14 @@ const BudgetMembers = ({ members = [], budgetId, onRemove, onRoleChange }) => {
                                 ? 'bg-blue-100 text-blue-800'
                                 : 'bg-gray-100 text-gray-800'
                         }`}>
-                            {member.pivot?.role || 'member'}
+                            {member.pivot?.role || t('common.member')}
                         </span>
                         {member.pivot?.role !== 'owner' && (
                             <button
                                 onClick={() => handleRemove(member.id)}
                                 className="text-red-600 hover:text-red-700 text-sm"
                             >
-                                Remove
+                                {t('common.remove')}
                             </button>
                         )}
                     </div>

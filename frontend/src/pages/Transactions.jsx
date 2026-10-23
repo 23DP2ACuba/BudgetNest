@@ -8,8 +8,10 @@ import Modal from '../components/ui/Modal';
 import Alert from '../components/ui/Alert';
 import { formatCurrency, formatDate } from '../utils/formatters';
 import TransactionFilters from '../components/transactions/TransactionFilters';
+import { useTranslation } from 'react-i18next';
 
 const Transactions = () => {
+    const { t } = useTranslation();
     const [transactions, setTransactions] = useState([]);
     const [categories, setCategories] = useState([]);
     const [budgets, setBudgets] = useState([]);
@@ -52,7 +54,7 @@ const Transactions = () => {
             setCategories(categoriesData);
             setBudgets(budgetsData);
         } catch (err) {
-            setError('Failed to load data');
+            setError(t('common.failedToLoadData'));
         } finally {
             setLoading(false);
         }
@@ -103,29 +105,29 @@ const Transactions = () => {
         try {
             if (editingTransaction) {
                 await updateTransaction(editingTransaction.id, formData);
-                setSuccess('Transaction updated successfully');
+                setSuccess(t('common.transactionUpdated'));
             } else {
                 await createTransaction(formData);
-                setSuccess('Transaction created successfully');
+                setSuccess(t('common.transactionCreated'));
             }
             handleCloseModal();
             fetchData();
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to save transaction');
+            setError(err.response?.data?.message || t('common.failedToSaveTransaction'));
         }
     };
 
     const handleDelete = async (id) => {
-        if (!confirm('Are you sure you want to delete this transaction?')) return;
+        if (!confirm(t('common.areYouSureDeleteTransaction'))) return;
 
         try {
             await deleteTransaction(id);
-            setSuccess('Transaction deleted successfully');
+            setSuccess(t('common.transactionDeleted'));
             fetchData();
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            setError('Failed to delete transaction');
+            setError(err.response?.data?.message || t('common.failedToDeleteTransaction'));
         }
     };
 
@@ -143,12 +145,12 @@ const Transactions = () => {
             
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900">Transactions</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">{t('common.transactions')}</h1>
                     <button
                         onClick={() => handleOpenModal()}
                         className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                     >
-                        Add Transaction
+                        {t('common.addTransaction')}
                     </button>
                 </div>
 
@@ -166,22 +168,22 @@ const Transactions = () => {
                         <thead className="bg-gray-50">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Date
+                                    {t('common.date')}
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Description
+                                    {t('common.description')}
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Category
+                                    {t('common.category')}
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Type
+                                    {t('common.type')}
                                 </th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Amount
+                                    {t('common.amount')}
                                 </th>
                                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Actions
+                                    {t('common.actions')}
                                 </th>
                             </tr>
                         </thead>
@@ -189,7 +191,7 @@ const Transactions = () => {
                             {transactions.length === 0 ? (
                                 <tr>
                                     <td colSpan="6" className="px-6 py-4 text-center text-gray-500">
-                                        No transactions yet. Create your first transaction!
+                                        {t('common.noTransactionsCreate')}
                                     </td>
                                 </tr>
                             ) : (
@@ -210,7 +212,7 @@ const Transactions = () => {
                                                     ? 'bg-green-100 text-green-800' 
                                                     : 'bg-red-100 text-red-800'
                                             }`}>
-                                                {transaction.type}
+                                                {transaction.type === 'income' ? t('common.income') : t('common.expense')}
                                             </span>
                                         </td>
                                         <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${
@@ -224,13 +226,13 @@ const Transactions = () => {
                                                 onClick={() => handleOpenModal(transaction)}
                                                 className="text-indigo-600 hover:text-indigo-900 mr-4"
                                             >
-                                                Edit
+                                                {t('common.edit')}
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(transaction.id)}
                                                 className="text-red-600 hover:text-red-900"
                                             >
-                                                Delete
+                                                {t('common.delete')}
                                             </button>
                                         </td>
                                     </tr>
@@ -245,13 +247,13 @@ const Transactions = () => {
             <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
                 <div className="p-6">
                     <h2 className="text-2xl font-bold mb-4">
-                        {editingTransaction ? 'Edit Transaction' : 'Add Transaction'}
+                        {editingTransaction ? t('common.edit') : t('common.addTransaction')}
                     </h2>
                     
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Budget
+                                {t('common.budgetName')}
                             </label>
                             <select
                                 name="budget_id"
@@ -260,7 +262,7 @@ const Transactions = () => {
                                 required
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
                             >
-                                <option value="">Select Budget</option>
+                                <option value="">{t('common.allBudgets')}</option>
                                 {budgets.map((budget) => (
                                     <option key={budget.id} value={budget.id}>
                                         {budget.name}
@@ -271,7 +273,7 @@ const Transactions = () => {
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Category
+                                {t('common.category')}
                             </label>
                             <select
                                 name="category_id"
@@ -280,7 +282,7 @@ const Transactions = () => {
                                 required
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
                             >
-                                <option value="">Select Category</option>
+                                <option value="">{t('common.all')}</option>
                                 {categories.map((category) => (
                                     <option key={category.id} value={category.id}>
                                         {category.name}
@@ -291,7 +293,7 @@ const Transactions = () => {
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Type
+                                {t('common.type')}
                             </label>
                             <select
                                 name="type"
@@ -300,14 +302,14 @@ const Transactions = () => {
                                 required
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
                             >
-                                <option value="expense">Expense</option>
-                                <option value="income">Income</option>
+                                <option value="expense">{t('common.expense')}</option>
+                                <option value="income">{t('common.income')}</option>
                             </select>
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Amount
+                                {t('common.amount')}
                             </label>
                             <input
                                 type="number"
@@ -323,7 +325,7 @@ const Transactions = () => {
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Date
+                                {t('common.date')}
                             </label>
                             <input
                                 type="date"
@@ -337,7 +339,7 @@ const Transactions = () => {
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Description
+                                {t('common.description')}
                             </label>
                             <textarea
                                 name="description"
@@ -356,13 +358,13 @@ const Transactions = () => {
                                 onClick={handleCloseModal}
                                 className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                             >
-                                Cancel
+                                {t('common.cancel')}
                             </button>
                             <button
                                 type="submit"
                                 className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                             >
-                                {editingTransaction ? 'Update' : 'Create'}
+                                {editingTransaction ? t('common.update') : t('common.create')}
                             </button>
                         </div>
                     </form>

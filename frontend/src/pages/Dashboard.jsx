@@ -9,9 +9,11 @@ import { formatCurrency, formatDate } from '../utils/formatters';
 import PendingInvitations from '../components/budgets/PendingInvitations';
 import MonthlyTrend from '../components/charts/MonthlyTrend';
 import ExpenseByCategory from '../components/charts/ExpenseByCategory';
+import { useTranslation } from 'react-i18next';
 
 const Dashboard = () => {
     const { user } = useAuth();
+    const { t } = useTranslation();
     const [budgets, setBudgets] = useState([]);
     const [recentTransactions, setRecentTransactions] = useState([]);
     const [monthlyTrend, setMonthlyTrend] = useState([]);
@@ -77,12 +79,12 @@ const Dashboard = () => {
                 }
             });
 
-            const monthlyTrend = Object.entries(monthlyData).map(([month, data]) => ({
+            const monthlyTrendData = Object.entries(monthlyData).map(([month, data]) => ({
                 month,
                 ...data,
             }));
 
-            const expenseCategories = Object.entries(expenseByCategory).map(([name, amount]) => ({
+            const expenseCategoriesData = Object.entries(expenseByCategory).map(([name, amount]) => ({
                 name,
                 amount,
             }));
@@ -92,8 +94,8 @@ const Dashboard = () => {
                 totalIncome: income,
                 totalExpenses: expenses,
             });
-            setMonthlyTrend(monthlyTrend);
-            setExpenseCategories(expenseCategories);
+            setMonthlyTrend(monthlyTrendData);
+            setExpenseCategories(expenseCategoriesData);
         } catch (error) {
             console.error('Failed to fetch dashboard data:', error);
         } finally {
@@ -116,10 +118,10 @@ const Dashboard = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900">
-                        Welcome back, {user?.name}!
+                        {t('common.welcomeBack', { name: user?.name })}
                     </h1>
                     <p className="mt-2 text-gray-600">
-                        Here's an overview of your financial activity
+                        {t('common.financialOverview')}
                     </p>
                 </div>
 
@@ -128,7 +130,7 @@ const Dashboard = () => {
                     <div className="bg-white rounded-lg shadow p-6">
                         <div className="flex items-center">
                             <div className="flex-1">
-                                <p className="text-sm font-medium text-gray-600">Total Budgets</p>
+                                <p className="text-sm font-medium text-gray-600">{t('common.totalBudgets')}</p>
                                 <p className="text-3xl font-bold text-gray-900">{stats.totalBudgets}</p>
                             </div>
                             <div className="bg-indigo-100 rounded-full p-3">
@@ -142,7 +144,7 @@ const Dashboard = () => {
                     <div className="bg-white rounded-lg shadow p-6">
                         <div className="flex items-center">
                             <div className="flex-1">
-                                <p className="text-sm font-medium text-gray-600">Total Income</p>
+                                <p className="text-sm font-medium text-gray-600">{t('common.totalIncome')}</p>
                                 <p className="text-3xl font-bold text-green-600">${stats.totalIncome.toFixed(2)}</p>
                             </div>
                             <div className="bg-green-100 rounded-full p-3">
@@ -156,12 +158,12 @@ const Dashboard = () => {
                     <div className="bg-white rounded-lg shadow p-6">
                         <div className="flex items-center">
                             <div className="flex-1">
-                                <p className="text-sm font-medium text-gray-600">Total Expenses</p>
+                                <p className="text-sm font-medium text-gray-600">{t('common.totalExpenses')}</p>
                                 <p className="text-3xl font-bold text-red-600">${stats.totalExpenses.toFixed(2)}</p>
                             </div>
                             <div className="bg-red-100 rounded-full p-3">
                                 <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 003 3v8a3 3 0 003 3z" />
                                 </svg>
                             </div>
                         </div>
@@ -171,27 +173,27 @@ const Dashboard = () => {
                 {/* Quick Actions */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <div className="bg-white rounded-lg shadow p-6">
-                        <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
+                        <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('common.quickActions')}</h2>
                         <div className="space-y-3">
                             <Link
                                 to="/transactions"
                                 className="block w-full text-left px-4 py-3 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition"
                             >
-                                <span className="text-indigo-700 font-medium">Add Transaction</span>
+                                <span className="text-indigo-700 font-medium">{t('common.addTransaction')}</span>
                             </Link>
                             <Link
                                 to="/budgets"
                                 className="block w-full text-left px-4 py-3 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition"
                             >
-                                <span className="text-indigo-700 font-medium">Create Budget</span>
+                                <span className="text-indigo-700 font-medium">{t('common.createBudget')}</span>
                             </Link>
                         </div>
                     </div>
 
                     <div className="bg-white rounded-lg shadow p-6">
-                        <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Budgets</h2>
+                        <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('common.yourBudgets')}</h2>
                         {budgets.length === 0 ? (
-                            <p className="text-gray-500">No budgets yet. Create your first budget!</p>
+                            <p className="text-gray-500">{t('common.noBudgets')}</p>
                         ) : (
                             <div className="space-y-3">
                                 {budgets.slice(0, 3).map((budget) => (
@@ -211,7 +213,7 @@ const Dashboard = () => {
                                         to="/budgets"
                                         className="block text-center text-indigo-600 hover:text-indigo-700 font-medium"
                                     >
-                                        View all budgets
+                                        {t('common.viewAllBudgets')}
                                     </Link>
                                 )}
                             </div>
@@ -223,10 +225,10 @@ const Dashboard = () => {
                 <div className="bg-white rounded-lg shadow border border-gray-200 p-6 mb-8">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <h2 className="text-xl font-semibold text-gray-900">
-                            Budget Statistics
+                            {t('common.budgetStatistics')}
                         </h2>
                         <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600">View by budget:</span>
+                            <span className="text-sm text-gray-600">{t('common.viewByBudget')}</span>
                             <select
                                 value={selectedBudgetId || ''}
                                 onChange={(e) =>
@@ -236,7 +238,7 @@ const Dashboard = () => {
                                 }
                                 className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white"
                             >
-                                <option value="">All Budgets</option>
+                                <option value="">{t('common.allBudgets')}</option>
                                 {budgets.map((budget) => (
                                     <option key={budget.id} value={budget.id}>
                                         {budget.name}
@@ -254,16 +256,16 @@ const Dashboard = () => {
                 {/* Recent Transactions */}
                 <div className="bg-white rounded-lg shadow p-6">
                     <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-semibold text-gray-900">Recent Transactions</h2>
+                        <h2 className="text-xl font-semibold text-gray-900">{t('common.recentTransactions')}</h2>
                         <Link
                             to="/transactions"
                             className="text-indigo-600 hover:text-indigo-700 font-medium"
                         >
-                            View all
+                            {t('common.viewAll')}
                         </Link>
                     </div>
                     {recentTransactions.length === 0 ? (
-                        <p className="text-gray-500">No transactions yet. Add your first transaction!</p>
+                        <p className="text-gray-500">{t('common.noTransactionsCreate')}</p>
                     ) : (
                         <div className="space-y-3">
                             {recentTransactions.map((transaction) => (

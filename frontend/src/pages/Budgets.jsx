@@ -6,8 +6,10 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 import Modal from '../components/ui/Modal';
 import Alert from '../components/ui/Alert';
 import { formatCurrency, formatDate } from '../utils/formatters';
+import { useTranslation } from 'react-i18next';
 
 const Budgets = () => {
+    const { t } = useTranslation();
     const [budgets, setBudgets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,7 +34,7 @@ const Budgets = () => {
             const data = await getBudgets();
             setBudgets(data);
         } catch (err) {
-            setError('Failed to load budgets');
+            setError(t('common.failedToLoadBudgets'));
         } finally {
             setLoading(false);
         }
@@ -81,29 +83,29 @@ const Budgets = () => {
         try {
             if (editingBudget) {
                 await updateBudget(editingBudget.id, formData);
-                setSuccess('Budget updated successfully');
+                setSuccess(t('common.budgetUpdated'));
             } else {
                 await createBudget(formData);
-                setSuccess('Budget created successfully');
+                setSuccess(t('common.budgetCreated'));
             }
             handleCloseModal();
             fetchBudgets();
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to save budget');
+            setError(err.response?.data?.message || t('common.failedToSaveBudget'));
         }
     };
 
     const handleDelete = async (id) => {
-        if (!confirm('Are you sure you want to delete this budget? All associated transactions will be deleted.')) return;
+        if (!confirm(t('common.areYouSureDeleteBudget'))) return;
 
         try {
             await deleteBudget(id);
-            setSuccess('Budget deleted successfully');
+            setSuccess(t('common.budgetDeleted'));
             fetchBudgets();
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            setError('Failed to delete budget');
+            setError(err.response?.data?.message || t('common.failedToDeleteBudget'));
         }
     };
 
@@ -121,12 +123,12 @@ const Budgets = () => {
             
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900">Budgets</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">{t('common.budgets')}</h1>
                     <button
                         onClick={() => handleOpenModal()}
                         className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                     >
-                        Create Budget
+                        {t('common.createBudget')}
                     </button>
                 </div>
 
@@ -136,7 +138,7 @@ const Budgets = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
                     {budgets.length === 0 ? (
                         <div className="col-span-full text-center py-12">
-                            <p className="text-gray-500">No budgets yet. Create your first budget!</p>
+                            <p className="text-gray-500">{t('common.noBudgets')}</p>
                         </div>
                     ) : (
                         budgets.map((budget) => (
@@ -174,13 +176,13 @@ const Budgets = () => {
 
                                 <div className="border-t pt-4">
                                     <div className="flex justify-between items-center mb-2">
-                                        <span className="text-sm text-gray-600">Total Budget</span>
+                                        <span className="text-sm text-gray-600">{t('common.totalBudget')}</span>
                                         <span className="text-lg font-semibold text-gray-900">
                                             {formatCurrency(budget.total_amount)}
                                         </span>
                                     </div>
                                     <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-600">Members</span>
+                                        <span className="text-gray-600">{t('common.members')}</span>
                                         <span className="text-gray-900">{budget.users?.length || 0}</span>
                                     </div>
                                 </div>
@@ -189,7 +191,7 @@ const Budgets = () => {
                                     to={`/budgets/${budget.id}`}
                                     className="mt-4 block w-full text-center px-4 py-2 bg-indigo-50 text-indigo-700 rounded-md hover:bg-indigo-100"
                                 >
-                                    View Details
+                                    {t('common.viewDetails')}
                                 </Link>
                             </div>
                         ))
@@ -201,13 +203,13 @@ const Budgets = () => {
             <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
                 <div className="p-6">
                     <h2 className="text-2xl font-bold mb-4">
-                        {editingBudget ? 'Edit Budget' : 'Create Budget'}
+                        {editingBudget ? t('common.edit') : t('common.createBudget')}
                     </h2>
                     
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Budget Name
+                                {t('common.budgetName')}
                             </label>
                             <input
                                 type="text"
@@ -216,13 +218,13 @@ const Budgets = () => {
                                 onChange={handleChange}
                                 required
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                                placeholder="e.g., Household Budget"
+                                placeholder={t('common.fullName')}
                             />
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Description
+                                {t('common.description')}
                             </label>
                             <textarea
                                 name="description"
@@ -236,7 +238,7 @@ const Budgets = () => {
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Total Amount
+                                {t('common.totalAmount')}
                             </label>
                             <input
                                 type="number"
@@ -254,7 +256,7 @@ const Budgets = () => {
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Start Date
+                                    {t('common.startDate')}
                                 </label>
                                 <input
                                     type="date"
@@ -268,7 +270,7 @@ const Budgets = () => {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    End Date
+                                    {t('common.endDate')}
                                 </label>
                                 <input
                                     type="date"
@@ -289,13 +291,13 @@ const Budgets = () => {
                                 onClick={handleCloseModal}
                                 className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                             >
-                                Cancel
+                                {t('common.cancel')}
                             </button>
                             <button
                                 type="submit"
                                 className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                             >
-                                {editingBudget ? 'Update' : 'Create'}
+                                {editingBudget ? t('common.update') : t('common.create')}
                             </button>
                         </div>
                     </form>

@@ -7,10 +7,12 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 import Modal from '../components/ui/Modal';
 import Alert from '../components/ui/Alert';
 import { formatCurrency, formatDate } from '../utils/formatters';
+import { useTranslation } from 'react-i18next';
 
 const BudgetDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [budget, setBudget] = useState(null);
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -59,7 +61,7 @@ const BudgetDetail = () => {
                 balance: income - expenses,
             });
         } catch (err) {
-            setError('Failed to load budget details');
+            setError(t('common.budgetNotFound'));
             console.error(err);
         } finally {
             setLoading(false);
@@ -72,38 +74,38 @@ const BudgetDetail = () => {
 
         try {
             await inviteMember(id, inviteData);
-            setSuccess('Member invited successfully');
+            setSuccess(t('common.memberInvited'));
             setIsInviteModalOpen(false);
             setInviteData({ email: '', role: 'viewer' });
             fetchBudgetData();
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to invite member');
+            setError(err.response?.data?.message || t('common.failedToInviteMember'));
         }
     };
 
     const handleRemoveMember = async (userId) => {
-        if (!confirm('Are you sure you want to remove this member?')) return;
+        if (!confirm(t('common.areYouSureRemoveMember'))) return;
 
         try {
             await removeMember(id, userId);
-            setSuccess('Member removed successfully');
+            setSuccess(t('common.memberRemoved'));
             fetchBudgetData();
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            setError('Failed to remove member');
+            setError(err.response?.data?.message || t('common.failedToRemoveMember'));
         }
     };
 
     const handleLeaveBudget = async () => {
-        if (!confirm('Are you sure you want to leave this budget?')) return;
+        if (!confirm(t('common.areYouSureLeaveBudget'))) return;
 
         try {
             await leaveBudget(id);
-            setSuccess('You have left the budget.');
+            setSuccess(t('common.budgetLeft'));
             setTimeout(() => navigate('/budgets'), 1500);
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to leave budget');
+            setError(err.response?.data?.message || t('common.failedToLeaveBudget'));
         }
     };
 
@@ -120,7 +122,7 @@ const BudgetDetail = () => {
             <div className="min-h-screen bg-gray-50">
                 <Navbar />
                 <div className="max-w-7xl mx-auto px-4 py-8">
-                    <Alert type="error" message="Budget not found" />
+                    <Alert type="error" message={t('common.budgetNotFound')} />
                 </div>
             </div>
         );
@@ -137,7 +139,7 @@ const BudgetDetail = () => {
                         onClick={() => navigate('/budgets')}
                         className="text-indigo-600 hover:text-indigo-700 mb-4"
                     >
-                        ← Back to Budgets
+                        ← {t('common.backToBudgets')}
                     </button>
                     <h1 className="text-3xl font-bold text-gray-900">{budget.name}</h1>
                     {budget.description && (
@@ -154,19 +156,19 @@ const BudgetDetail = () => {
                 {/* Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     <div className="bg-white rounded-lg shadow p-6">
-                        <p className="text-sm font-medium text-gray-600">Total Budget</p>
+                        <p className="text-sm font-medium text-gray-600">{t('common.totalBudget')}</p>
                         <p className="text-2xl font-bold text-gray-900">{formatCurrency(budget.total_amount)}</p>
                     </div>
                     <div className="bg-white rounded-lg shadow p-6">
-                        <p className="text-sm font-medium text-gray-600">Total Income</p>
+                        <p className="text-sm font-medium text-gray-600">{t('common.totalIncome')}</p>
                         <p className="text-2xl font-bold text-green-600">{formatCurrency(stats.totalIncome)}</p>
                     </div>
                     <div className="bg-white rounded-lg shadow p-6">
-                        <p className="text-sm font-medium text-gray-600">Total Expenses</p>
+                        <p className="text-sm font-medium text-gray-600">{t('common.totalExpenses')}</p>
                         <p className="text-2xl font-bold text-red-600">{formatCurrency(stats.totalExpenses)}</p>
                     </div>
                     <div className="bg-white rounded-lg shadow p-6">
-                        <p className="text-sm font-medium text-gray-600">Balance</p>
+                        <p className="text-sm font-medium text-gray-600">{t('common.balance')}</p>
                         <p className={`text-2xl font-bold ${stats.balance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                             {formatCurrency(stats.balance)}
                         </p>
@@ -178,11 +180,11 @@ const BudgetDetail = () => {
                     <div className="lg:col-span-2">
                         <div className="bg-white rounded-lg shadow">
                             <div className="px-6 py-4 border-b border-gray-200">
-                                <h2 className="text-xl font-semibold text-gray-900">Transactions</h2>
+                                <h2 className="text-xl font-semibold text-gray-900">{t('common.transactions')}</h2>
                             </div>
                             <div className="p-6">
                                 {transactions.length === 0 ? (
-                                    <p className="text-gray-500 text-center py-4">No transactions yet</p>
+                                    <p className="text-gray-500 text-center py-4">{t('common.noTransactions')}</p>
                                 ) : (
                                     <div className="space-y-4">
                                         {transactions.slice(0, 10).map((transaction) => (
@@ -216,20 +218,20 @@ const BudgetDetail = () => {
                     <div className="lg:col-span-1">
                         <div className="bg-white rounded-lg shadow">
                             <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                                <h2 className="text-xl font-semibold text-gray-900">Members</h2>
+                                <h2 className="text-xl font-semibold text-gray-900">{t('common.members')}</h2>
                                 <div className="flex items-center space-x-2">
                                     <button
                                         onClick={() => setIsInviteModalOpen(true)}
                                         className="text-sm text-indigo-600 hover:text-indigo-700"
                                     >
-                                        + Invite
+                                        + {t('common.invite')}
                                     </button>
                                     <button
                                         onClick={handleLeaveBudget}
                                         disabled={isLeaving}
                                         className={`text-sm ${isLeaving ? 'text-gray-400' : 'text-red-600'} hover:${isLeaving ? 'text-gray-400' : 'text-red-700'}`}
                                     >
-                                        {isLeaving ? 'Leaving...' : 'Leave Budget'}
+                                        {isLeaving ? t('common.loading') : t('common.logout')}
                                     </button>
                                 </div>
                             </div>
@@ -241,7 +243,7 @@ const BudgetDetail = () => {
                                                 <p className="font-medium text-gray-900">{member.name}</p>
                                                 <p className="text-sm text-gray-500">{member.email}</p>
                                                 <span className="inline-block mt-1 px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800">
-                                                    {member.pivot?.role || 'member'}
+                                                    {member.pivot?.role || t('common.member')}
                                                 </span>
                                             </div>
                                             {budget.created_by !== member.id && (
@@ -249,7 +251,7 @@ const BudgetDetail = () => {
                                                     onClick={() => handleRemoveMember(member.id)}
                                                     className="text-red-600 hover:text-red-700 text-sm"
                                                 >
-                                                    Remove
+                                                    {t('common.remove')}
                                                 </button>
                                             )}
                                         </div>
@@ -264,12 +266,12 @@ const BudgetDetail = () => {
             {/* Invite Modal */}
             <Modal isOpen={isInviteModalOpen} onClose={() => setIsInviteModalOpen(false)}>
                 <div className="p-6">
-                    <h2 className="text-2xl font-bold mb-4">Invite Member</h2>
+                    <h2 className="text-2xl font-bold mb-4">{t('common.inviteMember')}</h2>
                     
                     <form onSubmit={handleInvite} className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Email Address
+                                {t('common.emailAddress')}
                             </label>
                             <input
                                 type="email"
@@ -277,22 +279,22 @@ const BudgetDetail = () => {
                                 onChange={(e) => setInviteData({ ...inviteData, email: e.target.value })}
                                 required
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                                placeholder="member@example.com"
+                                placeholder={t('common.emailAddress')}
                             />
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Role
+                                {t('common.role')}
                             </label>
                             <select
                                 value={inviteData.role}
                                 onChange={(e) => setInviteData({ ...inviteData, role: e.target.value })}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
                             >
-                                <option value="viewer">Viewer (Read only)</option>
-                                <option value="editor">Editor (Can add/edit transactions)</option>
-                                <option value="owner">Owner (Full access)</option>
+                                <option value="viewer">{t('common.viewer')}</option>
+                                <option value="editor">{t('common.editor')}</option>
+                                <option value="owner">{t('common.owner')}</option>
                             </select>
                         </div>
 
@@ -304,13 +306,13 @@ const BudgetDetail = () => {
                                 onClick={() => setIsInviteModalOpen(false)}
                                 className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                             >
-                                Cancel
+                                {t('common.cancel')}
                             </button>
                             <button
                                 type="submit"
                                 className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                             >
-                                Send Invitation
+                                {t('common.sendInvitation')}
                             </button>
                         </div>
                     </form>

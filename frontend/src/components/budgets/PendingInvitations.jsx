@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import { getMyInvitations, acceptInvitation, declineInvitation } from '../../api/budgets';
 import Alert from '../../components/ui/Alert';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { useTranslation } from 'react-i18next';
 
 const PendingInvitations = () => {
+    const { t } = useTranslation();
     const [invitations, setInvitations] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -18,7 +20,7 @@ const PendingInvitations = () => {
             const data = await getMyInvitations();
             setInvitations(data || []);
         } catch (err) {
-            setError('Failed to load invitations');
+            setError(t('common.failedToLoadData'));
         } finally {
             setLoading(false);
         }
@@ -29,7 +31,7 @@ const PendingInvitations = () => {
             await acceptInvitation(budgetId);
             setInvitations((prev) => prev.filter((inv) => inv.id !== budgetId));
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to accept invitation');
+            setError(err.response?.data?.message || t('common.failedToInviteMember'));
         }
     };
 
@@ -38,7 +40,7 @@ const PendingInvitations = () => {
             await declineInvitation(budgetId);
             setInvitations((prev) => prev.filter((inv) => inv.id !== budgetId));
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to decline invitation');
+            setError(err.response?.data?.message || t('common.failedToInviteMember'));
         }
     };
 
@@ -54,7 +56,7 @@ const PendingInvitations = () => {
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 mb-6">
             <div className="flex items-center mb-4">
                 <span className="text-amber-600 font-bold text-lg">📨</span>
-                <h3 className="ml-2 text-lg font-semibold text-gray-900">Pending Invitations</h3>
+                <h3 className="ml-2 text-lg font-semibold text-gray-900">{t('common.pendingInvitations')}</h3>
             </div>
             {error && <Alert type="error" message={error} />}
             <div className="space-y-3">
@@ -65,10 +67,10 @@ const PendingInvitations = () => {
                     >
                         <div>
                             <p className="font-medium text-gray-900">
-                                {invitation.name || 'Unnamed Budget'}
+                                {invitation.name || t('common.noData')}
                             </p>
                             <p className="text-sm text-gray-500">
-                                Invited by {invitation.creator?.name || 'Unknown'}
+                                {t('common.invitedBy', { name: invitation.creator?.name || t('common.noData') })}
                             </p>
                         </div>
                         <div className="flex space-x-2">
@@ -76,13 +78,13 @@ const PendingInvitations = () => {
                                 onClick={() => handleAccept(invitation.id)}
                                 className="px-3 py-1 bg-green-600 text-white text-sm rounded-md hover:bg-green-700"
                             >
-                                Accept
+                                {t('common.accept')}
                             </button>
                             <button
                                 onClick={() => handleDecline(invitation.id)}
                                 className="px-3 py-1 bg-red-600 text-white text-sm rounded-md hover:bg-red-700"
                             >
-                                Decline
+                                {t('common.decline')}
                             </button>
                         </div>
                     </div>

@@ -3,10 +3,12 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { register } from '../api/auth';
 import Alert from '../components/ui/Alert';
+import { useTranslation } from 'react-i18next';
 
 const Register = () => {
     const navigate = useNavigate();
     const { login: setAuth } = useAuth();
+    const { t } = useTranslation();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -28,7 +30,7 @@ const Register = () => {
         setError('');
 
         if (formData.password !== formData.password_confirmation) {
-            setError('Passwords do not match');
+            setError(t('common.passwordsDoNotMatch'));
             return;
         }
 
@@ -39,7 +41,7 @@ const Register = () => {
             setAuth(response.token, response.user);
             navigate('/dashboard');
         } catch (err) {
-            setError(err.response?.data?.message || 'Registration failed. Please try again.');
+            setError(err.response?.data?.message || t('common.registrationFailed'));
         } finally {
             setLoading(false);
         }
@@ -50,12 +52,12 @@ const Register = () => {
             <div className="max-w-md w-full space-y-8">
                 <div>
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                        Create your account
+                        {t('common.createNewAccount')}
                     </h2>
                     <p className="mt-2 text-center text-sm text-gray-600">
-                        Or{' '}
+                        {t('common.or')}{' '}
                         <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
-                            sign in to your account
+                            {t('common.signInToAccount')}
                         </Link>
                     </p>
                 </div>
@@ -66,7 +68,7 @@ const Register = () => {
                     <div className="rounded-md shadow-sm space-y-4">
                         <div>
                             <label htmlFor="name" className="sr-only">
-                                Full name
+                                {t('common.fullName')}
                             </label>
                             <input
                                 id="name"
@@ -74,14 +76,14 @@ const Register = () => {
                                 type="text"
                                 required
                                 className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                                placeholder="Full name"
+                                placeholder={t('common.fullName')}
                                 value={formData.name}
                                 onChange={handleChange}
                             />
                         </div>
                         <div>
                             <label htmlFor="email" className="sr-only">
-                                Email address
+                                {t('common.emailAddress')}
                             </label>
                             <input
                                 id="email"
@@ -89,14 +91,14 @@ const Register = () => {
                                 type="email"
                                 required
                                 className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                                placeholder="Email address"
+                                placeholder={t('common.emailAddress')}
                                 value={formData.email}
                                 onChange={handleChange}
                             />
                         </div>
                         <div>
                             <label htmlFor="password" className="sr-only">
-                                Password
+                                {t('common.password')}
                             </label>
                             <input
                                 id="password"
@@ -105,14 +107,14 @@ const Register = () => {
                                 required
                                 minLength={8}
                                 className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                                placeholder="Password (min 8 characters)"
+                                placeholder={t('common.password')}
                                 value={formData.password}
                                 onChange={handleChange}
                             />
                         </div>
                         <div>
                             <label htmlFor="password_confirmation" className="sr-only">
-                                Confirm password
+                                {t('common.confirmPassword')}
                             </label>
                             <input
                                 id="password_confirmation"
@@ -120,7 +122,7 @@ const Register = () => {
                                 type="password"
                                 required
                                 className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                                placeholder="Confirm password"
+                                placeholder={t('common.confirmPassword')}
                                 value={formData.password_confirmation}
                                 onChange={handleChange}
                             />
@@ -133,7 +135,7 @@ const Register = () => {
                             disabled={loading}
                             className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
                         >
-                            {loading ? 'Creating account...' : 'Create account'}
+                            {loading ? t('common.creatingAccount') : t('common.createAccount')}
                         </button>
                     </div>
                 </form>

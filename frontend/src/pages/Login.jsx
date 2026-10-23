@@ -5,10 +5,12 @@ import { login } from '../api/auth';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import Alert from '../components/ui/Alert';
+import { useTranslation } from 'react-i18next';
 
 const Login = () => {
     const navigate = useNavigate();
     const { login: setAuth } = useAuth();
+    const { t } = useTranslation();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -33,7 +35,7 @@ const Login = () => {
             setAuth(response.token, response.user);
             navigate('/dashboard');
         } catch (err) {
-            setError(err.response?.data?.message || 'Login failed. Please try again.');
+            setError(err.response?.data?.message || t('common.loginFailed'));
         } finally {
             setLoading(false);
         }
@@ -44,12 +46,12 @@ const Login = () => {
             <div className="max-w-md w-full space-y-8">
                 <div>
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                        Sign in to BudgetNest
+                        {t('common.signInToBudgetNest')}
                     </h2>
                     <p className="mt-2 text-center text-sm text-gray-600">
-                        Or{' '}
+                        {t('common.or')}{' '}
                         <Link to="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
-                            create a new account
+                            {t('common.createNewAccountLink')}
                         </Link>
                     </p>
                 </div>
@@ -60,7 +62,7 @@ const Login = () => {
                     <div className="rounded-md shadow-sm -space-y-px">
                         <div>
                             <label htmlFor="email" className="sr-only">
-                                Email address
+                                {t('common.emailAddress')}
                             </label>
                             <input
                                 id="email"
@@ -68,14 +70,14 @@ const Login = () => {
                                 type="email"
                                 required
                                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                                placeholder="Email address"
+                                placeholder={t('common.emailAddress')}
                                 value={formData.email}
                                 onChange={handleChange}
                             />
                         </div>
                         <div>
                             <label htmlFor="password" className="sr-only">
-                                Password
+                                {t('common.password')}
                             </label>
                             <input
                                 id="password"
@@ -83,7 +85,7 @@ const Login = () => {
                                 type="password"
                                 required
                                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                                placeholder="Password"
+                                placeholder={t('common.password')}
                                 value={formData.password}
                                 onChange={handleChange}
                             />
@@ -96,7 +98,7 @@ const Login = () => {
                             disabled={loading}
                             className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
                         >
-                            {loading ? 'Signing in...' : 'Sign in'}
+                            {loading ? t('common.signingIn') : t('common.signIn')}
                         </button>
                     </div>
                 </form>
