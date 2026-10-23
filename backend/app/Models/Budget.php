@@ -38,7 +38,7 @@ class Budget extends Model
     public function users()
     {
         return $this->belongsToMany(User::class, 'budget_user')
-            ->withPivot('role')
+            ->withPivot('role', 'status', 'invited_by')
             ->withTimestamps();
     }
 

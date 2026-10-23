@@ -18,6 +18,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Auth routes
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/user', [AuthController::class, 'user']);
+    Route::put('/auth/profile', [ProfileController::class, 'update']);
+    Route::put('/auth/password', [ProfileController::class, 'updatePassword']);
+    Route::delete('/auth/profile', [ProfileController::class, 'destroy']);
     
     // Category routes
     Route::apiResource('categories', CategoryController::class);
@@ -26,6 +29,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('budgets', BudgetController::class);
     Route::post('/budgets/{budget}/invite', [InvitationController::class, 'invite']);
     Route::delete('/budgets/{budget}/members/{user}', [BudgetController::class, 'removeMember']);
+    Route::delete('/budgets/{budget}/leave', [BudgetController::class, 'leave']);
+    
+    // Invitation routes
+    Route::get('/invitations', [InvitationController::class, 'myInvitations']);
+    Route::post('/invitations/{budget}/accept', [InvitationController::class, 'accept']);
+    Route::post('/invitations/{budget}/decline', [InvitationController::class, 'decline']);
     
     // Transaction routes
     Route::apiResource('transactions', TransactionController::class);

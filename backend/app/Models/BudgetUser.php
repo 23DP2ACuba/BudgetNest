@@ -10,6 +10,8 @@ class BudgetUser extends Pivot
         'budget_id',
         'user_id',
         'role',
+        'status',
+        'invited_by',
     ];
 
     /**
