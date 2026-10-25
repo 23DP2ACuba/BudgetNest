@@ -83,7 +83,6 @@ const Navbar = () => {
                                 onClick={() => setLangOpen(!langOpen)}
                                 className="flex items-center px-2 py-1 rounded-md text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             >
-                                <span className="text-lg mr-1">{i18n.language === 'lv' ? '🇱🇻' : '🇺🇸'}</span>
                                 <span className="text-sm font-medium">{i18n.language === 'lv' ? 'LV' : 'EN'}</span>
                                 <svg className="w-4 h-4 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
                             </button>
