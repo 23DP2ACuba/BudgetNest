@@ -25,6 +25,18 @@ class BudgetTest extends TestCase
         $budget = new Budget(['total_amount' => '100.00']);
 
         $this->assertSame('decimal:2', $budget->getCasts()['total_amount'] ?? null);
+        $this->assertSame('100.00', $budget->total_amount);
+    }
+
+    public function test_budget_casts_dates_to_date_objects(): void
+    {
+        $budget = new Budget([
+            'start_date' => '2026-01-15',
+            'end_date' => '2026-02-15',
+        ]);
+
+        $this->assertSame('2026-01-15', $budget->start_date->format('Y-m-d'));
+        $this->assertSame('2026-02-15', $budget->end_date->format('Y-m-d'));
     }
 
     public function test_budget_has_creator_relationship(): void

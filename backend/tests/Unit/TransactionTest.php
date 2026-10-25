@@ -26,6 +26,14 @@ class TransactionTest extends TestCase
         $transaction = new Transaction(['amount' => '50.00']);
 
         $this->assertSame('decimal:2', $transaction->getCasts()['amount'] ?? null);
+        $this->assertSame('50.00', $transaction->amount);
+    }
+
+    public function test_transaction_casts_transaction_date_to_date_object(): void
+    {
+        $transaction = new Transaction(['transaction_date' => '2026-03-10']);
+
+        $this->assertSame('2026-03-10', $transaction->transaction_date->format('Y-m-d'));
     }
 
     public function test_transaction_has_budget_relationship(): void
