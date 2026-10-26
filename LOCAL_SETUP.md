@@ -98,6 +98,15 @@ extension must be enabled even though the regular local database is a file.
 
 ## Seeded local accounts
 
-`php artisan migrate --seed` adds sample accounts and categories. The seeder
-uses publicly visible default passwords; use these accounts only for local
-development and do not deploy them to a shared or production environment.
+`php artisan migrate --seed` adds sample accounts and categories, including the
+admin account. If you migrated without seeding, create the admin account by
+running this from the `backend` directory:
+
+```sh
+php artisan db:seed --class=AdminUserSeeder
+```
+
+The seeded admin login is `admin@budgetnest.com` with password `admin123`.
+The seeder is safe to rerun; it will not overwrite an existing account. These
+publicly visible default credentials are for local development only. Change
+them before using any shared or production environment.
