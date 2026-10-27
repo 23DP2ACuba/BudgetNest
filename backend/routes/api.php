@@ -8,6 +8,7 @@ use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ProfileController;
 
 // Public routes
 Route::post('/auth/register', [AuthController::class, 'register']);
