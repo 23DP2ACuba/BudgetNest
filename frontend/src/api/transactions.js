@@ -1,7 +1,15 @@
 import axiosInstance from './axios';
 
 export const getTransactions = async (budgetId, params) => {
+    if (!budgetId) {
+        throw new Error('getTransactions requires a budgetId. Use getAllTransactions() for the full list.');
+    }
     const response = await axiosInstance.get(`/budgets/${budgetId}/transactions`, { params });
+    return response.data;
+};
+
+export const getAllTransactions = async (params) => {
+    const response = await axiosInstance.get('/transactions', { params });
     return response.data;
 };
 
