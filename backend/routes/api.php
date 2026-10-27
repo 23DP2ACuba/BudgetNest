@@ -45,5 +45,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:admin')->prefix('admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard']);
         Route::get('/users', [AdminController::class, 'users']);
+        Route::delete('/users/{user}', [AdminController::class, 'destroyUser']);
     });
 });

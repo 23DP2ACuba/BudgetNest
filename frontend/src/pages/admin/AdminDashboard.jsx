@@ -16,6 +16,7 @@ const AdminDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
+    const [deletingUserId, setDeletingUserId] = useState(null);
 
     useEffect(() => {
         if (user?.role !== 'admin') {
@@ -50,6 +51,33 @@ const AdminDashboard = () => {
             setUsers(response.data.data || response.data);
         } catch (err) {
             setError(t('common.searchFailed'));
+        }
+    };
+
+    const handleDeleteUser = async (targetUser) => {
+        const confirmed = window.confirm(t('common.confirmDeleteUser', {
+            name: targetUser.name,
+            email: targetUser.email,
+        }));
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            setError('');
+            setDeletingUserId(targetUser.id);
+            await axiosInstance.delete(`/admin/users/${targetUser.id}`);
+            setUsers((currentUsers) => currentUsers.filter(({ id }) => id !== targetUser.id));
+            setStats((currentStats) => ({
+                ...currentStats,
+                total_users: Math.max(0, currentStats.total_users - 1),
+                recent_users: currentStats.recent_users.filter(({ id }) => id !== targetUser.id),
+            }));
+        } catch (err) {
+            setError(err.response?.data?.message || t('common.failedToDeleteUser'));
+        } finally {
+            setDeletingUserId(null);
         }
     };
 
@@ -179,31 +207,50 @@ const AdminDashboard = () => {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         {t('common.joined')}
                                     </th>
+                                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        {t('common.actions')}
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {users.length === 0 ? (
                                     <tr>
-                                        <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
+                                        <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
                                             {t('common.noUsersFound')}
                                         </td>
                                     </tr>
                                 ) : (
-                                    users.map((user) => (
-                                        <tr key={user.id}>
+                                    users.map((listedUser) => (
+                                        <tr key={listedUser.id}>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="font-medium text-gray-900">{user.name}</div>
+                                                <div className="font-medium text-gray-900">{listedUser.name}</div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {user.email}
+                                                {listedUser.email}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className="inline-block px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800">
-                                                    {user.role}
+                                                    {listedUser.role}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {new Date(user.created_at).toLocaleDateString()}
+                                                {new Date(listedUser.created_at).toLocaleDateString()}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+                                                {String(listedUser.id) === String(user?.id) ? (
+                                                    <span className="text-gray-500">{t('common.you')}</span>
+                                                ) : (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleDeleteUser(listedUser)}
+                                                        disabled={deletingUserId !== null}
+                                                        className="font-medium text-red-600 hover:text-red-800 disabled:cursor-not-allowed disabled:opacity-50"
+                                                    >
+                                                        {deletingUserId === listedUser.id
+                                                            ? t('common.loading')
+                                                            : t('common.deleteUser')}
+                                                    </button>
+                                                )}
                                             </td>
                                         </tr>
                                     ))

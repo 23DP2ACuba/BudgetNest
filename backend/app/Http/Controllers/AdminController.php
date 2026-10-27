@@ -42,4 +42,16 @@ class AdminController extends Controller
 
         return response()->json($users);
     }
+
+    /**
+     * Delete a user and the data owned by them.
+     */
+    public function destroyUser(Request $request, User $user)
+    {
+        abort_if($user->is($request->user()), 403, 'You cannot delete your own account.');
+
+        $user->delete();
+
+        return response()->json(['message' => 'User deleted successfully.']);
+    }
 }

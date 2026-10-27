@@ -3,6 +3,9 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Models\Budget;
+use App\Models\Category;
+use App\Models\Transaction;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -75,5 +78,64 @@ class AdminTest extends TestCase
         $response = $this->getJson('/api/admin/users');
 
         $response->assertStatus(403);
+    }
+
+    public function test_admin_can_delete_a_user_and_their_owned_data(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $user = User::factory()->create(['role' => 'user']);
+        $budget = Budget::factory()->create(['created_by' => $user->id]);
+        $category = Category::factory()->create();
+        $transaction = Transaction::factory()->create([
+            'budget_id' => $budget->id,
+            'category_id' => $category->id,
+            'user_id' => $user->id,
+        ]);
+        Sanctum::actingAs($admin);
+
+        $response = $this->deleteJson('/api/admin/users/' . $user->id);
+
+        $response->assertOk()->assertJson([
+            'message' => 'User deleted successfully.',
+        ]);
+        $this->assertDatabaseMissing('users', ['id' => $user->id]);
+        $this->assertDatabaseMissing('budgets', ['id' => $budget->id]);
+        $this->assertDatabaseMissing('transactions', ['id' => $transaction->id]);
+    }
+
+    public function test_admin_cannot_delete_their_own_account(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        Sanctum::actingAs($admin);
+
+        $response = $this->deleteJson('/api/admin/users/' . $admin->id);
+
+        $response->assertForbidden();
+        $this->assertDatabaseHas('users', ['id' => $admin->id]);
+    }
+
+    public function test_admin_can_delete_another_administrator_without_deleting_their_own_account(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $otherAdmin = User::factory()->create(['role' => 'admin']);
+        Sanctum::actingAs($admin);
+
+        $response = $this->deleteJson('/api/admin/users/' . $otherAdmin->id);
+
+        $response->assertOk();
+        $this->assertDatabaseMissing('users', ['id' => $otherAdmin->id]);
+        $this->assertDatabaseHas('users', ['id' => $admin->id]);
+    }
+
+    public function test_non_admin_cannot_delete_users(): void
+    {
+        $user = User::factory()->create(['role' => 'user']);
+        $target = User::factory()->create(['role' => 'user']);
+        Sanctum::actingAs($user);
+
+        $response = $this->deleteJson('/api/admin/users/' . $target->id);
+
+        $response->assertForbidden();
+        $this->assertDatabaseHas('users', ['id' => $target->id]);
     }
 }
