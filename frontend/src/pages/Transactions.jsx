@@ -144,11 +144,11 @@ const Transactions = () => {
             <Navbar />
             
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="flex justify-between items-center mb-8">
+                <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <h1 className="text-3xl font-bold text-gray-900">{t('common.transactions')}</h1>
                     <button
                         onClick={() => handleOpenModal()}
-                        className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                        className="self-start rounded-md bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 sm:self-auto"
                     >
                         {t('common.addTransaction')}
                     </button>
@@ -163,8 +163,9 @@ const Transactions = () => {
                     categories={categories}
                 />
 
-                <div className="bg-white shadow rounded-lg overflow-hidden">
-                    <table className="min-w-full divide-y divide-gray-200">
+                <div className="rounded-lg bg-white shadow">
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -239,7 +240,8 @@ const Transactions = () => {
                                 ))
                             )}
                         </tbody>
-                    </table>
+                        </table>
+                    </div>
                 </div>
             </div>
 
