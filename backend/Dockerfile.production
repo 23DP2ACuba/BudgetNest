@@ -1,0 +1,40 @@
+FROM composer:2 AS vendor
+
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install \
+    --no-dev \
+    --no-interaction \
+    --no-progress \
+    --no-scripts \
+    --prefer-dist \
+    --optimize-autoloader
+
+FROM php:8.4-apache
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        libonig-dev \
+        libpng-dev \
+        libxml2-dev \
+        unzip \
+    && docker-php-ext-install \
+        bcmath \
+        exif \
+        gd \
+        mbstring \
+        pdo_mysql \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+COPY . /var/www/html
+COPY --from=vendor /app/vendor /var/www/html/vendor
+COPY apache-vhost.conf /etc/apache2/sites-available/000-default.conf
+
+WORKDIR /var/www/html
+
+RUN a2enmod rewrite \
+    && composer dump-autoload --no-dev --optimize --no-interaction \
+    && chown -R www-data:www-data storage bootstrap/cache
+
+EXPOSE 80

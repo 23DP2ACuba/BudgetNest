@@ -1,0 +1,6 @@
+{$SITE_ADDRESS} {
+	@api path /api /api/* /sanctum/csrf-cookie
+	reverse_proxy @api backend:80
+
+	reverse_proxy frontend:80
+}
