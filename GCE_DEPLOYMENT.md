@@ -135,5 +135,9 @@ Keep the `.env.production` file and Docker volumes when updating. Removing the
 - Uploaded files and Laravel storage are persisted in the `backend_storage`
   volume. Include those files in your backup plan if the app stores uploads.
 - `APP_DEBUG` is disabled and the production Compose setup never runs seeders.
+- Users can permanently delete their accounts from Profile Settings after
+  confirming their password. Deletion removes budgets they own, transactions
+  they created (including those in shared budgets), and their memberships in
+  other budgets. The last admin account cannot be deleted.
 - The frontend is built with `/api` as its API URL and falls back to the SPA
   entry point for client-side routes.

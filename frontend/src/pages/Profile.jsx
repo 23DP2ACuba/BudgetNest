@@ -1,16 +1,20 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { updateProfile, updatePassword } from '../api/auth';
+import { deleteAccount, updateProfile, updatePassword } from '../api/auth';
 import Navbar from '../components/layout/Navbar';
 import Alert from '../components/ui/Alert';
 import { useTranslation } from 'react-i18next';
 
 const Profile = () => {
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const [success, setSuccess] = useState('');
     const [error, setError] = useState('');
     const [isEditing, setIsEditing] = useState(false);
+    const [deletePassword, setDeletePassword] = useState('');
+    const [isDeletingAccount, setIsDeletingAccount] = useState(false);
     const [formData, setFormData] = useState({
         name: user?.name || '',
         email: user?.email || '',
@@ -75,6 +79,32 @@ const Profile = () => {
             setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
             setError(err.response?.data?.message || t('common.failedToUpdatePassword'));
+        }
+    };
+
+    const handleDeleteAccount = async (e) => {
+        e.preventDefault();
+        setError('');
+        setSuccess('');
+
+        if (!window.confirm(t('common.confirmDeleteAccount'))) {
+            return;
+        }
+
+        setIsDeletingAccount(true);
+        try {
+            await deleteAccount(deletePassword);
+            logout();
+            navigate('/login', { replace: true });
+        } catch (err) {
+            setError(
+                err.response?.data?.errors?.password?.[0]
+                || err.response?.data?.errors?.account?.[0]
+                || err.response?.data?.message
+                || t('common.failedToDeleteAccount')
+            );
+        } finally {
+            setIsDeletingAccount(false);
         }
     };
 
@@ -182,6 +212,43 @@ const Profile = () => {
                                 </div>
                             </div>
                         )}
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow mb-6 border border-red-200">
+                    <div className="px-6 py-4 border-b border-red-100">
+                        <h2 className="text-xl font-semibold text-red-700">{t('common.deleteAccount')}</h2>
+                    </div>
+                    <div className="p-6">
+                        <p className="text-sm text-gray-700 mb-4">
+                            {t('common.deleteAccountWarning')}
+                            {user?.role === 'admin' && ` ${t('common.lastAdminCannotDelete')}`}
+                        </p>
+                        <form onSubmit={handleDeleteAccount} className="space-y-4">
+                            <div>
+                                <label htmlFor="delete-account-password" className="block text-sm font-medium text-gray-700 mb-1">
+                                    {t('common.confirmWithPassword')}
+                                </label>
+                                <input
+                                    id="delete-account-password"
+                                    type="password"
+                                    value={deletePassword}
+                                    onChange={(e) => setDeletePassword(e.target.value)}
+                                    required
+                                    autoComplete="current-password"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                />
+                            </div>
+                            <div className="flex justify-end">
+                                <button
+                                    type="submit"
+                                    disabled={isDeletingAccount}
+                                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+                                >
+                                    {isDeletingAccount ? t('common.deletingAccount') : t('common.deleteMyAccount')}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
 

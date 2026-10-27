@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -86,7 +87,19 @@ class ProfileController extends Controller
             ]);
         }
 
-        $user->delete();
+        DB::transaction(function () use ($user) {
+            if ($user->role === 'admin') {
+                $adminIds = User::where('role', 'admin')->lockForUpdate()->pluck('id');
+                if ($adminIds->count() === 1) {
+                    throw ValidationException::withMessages([
+                        'account' => 'Create another admin account before deleting the last admin account.',
+                    ]);
+                }
+            }
+
+            $user->tokens()->delete();
+            $user->delete();
+        });
 
         return response()->json([
             'message' => 'Account deleted successfully',
